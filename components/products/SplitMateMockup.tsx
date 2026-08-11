@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Plus,
   Receipt,
@@ -41,8 +42,14 @@ export function SplitMateMockup() {
           {/* App Title Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
-                <Receipt className="w-5 h-5" />
+              <div className="relative w-9 h-9 shrink-0">
+                <Image
+                  src="/products/splitmate/logo.png"
+                  alt="SplitMate Logo"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">

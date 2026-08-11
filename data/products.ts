@@ -10,6 +10,17 @@ export interface HowItWorksStep {
   description: string;
 }
 
+export interface ProductFAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface ProductUseCase {
+  title: string;
+  description: string;
+  iconName: string;
+}
+
 export interface Product {
   name: string;
   slug: string;
@@ -20,6 +31,7 @@ export interface Product {
   logo: string;
   icon: string;
   accentColor: string;
+  heroImage?: string;
   screenshots: string[];
   features: ProductFeature[];
   whyItExists: {
@@ -27,8 +39,14 @@ export interface Product {
     solution: string;
   };
   howItWorks: HowItWorksStep[];
+  faq: ProductFAQItem[];
+  useCases: ProductUseCase[];
   playStoreUrl?: string;
   websiteUrl?: string;
+  supportEmail: string;
+  privacyUrl: string;
+  termsUrl: string;
+  deleteAccountUrl: string;
   isFeatured: boolean;
   status: "Active" | "In Development";
   releaseYear: string;
@@ -39,13 +57,14 @@ export const products: Product[] = [
     name: "SplitMate",
     slug: "splitmate",
     category: "Expense Management",
-    tagline: "Split expenses, manage shared costs, and track balances effortlessly.",
+    tagline: "Shared expenses, simplified.",
     shortDescription:
-      "Split expenses, manage shared costs, and keep track of who owes what — without the usual confusion.",
+      "Split expenses, track balances, manage groups, and see exactly who owes what.",
     description:
-      "SplitMate is a mobile application developed by Fyndra Labs that simplifies shared expense splitting, group balances, and debt resolution.",
-    logo: "/products/splitmate/icon.svg",
-    icon: "/products/splitmate/icon.svg",
+      "SplitMate is an intuitive mobile application created by Fyndra Labs that simplifies shared bill splitting, group balances, and debt resolution.",
+    logo: "/products/splitmate/logo.png",
+    icon: "/products/splitmate/logo.png",
+    heroImage: "/products/splitmate/hero.jpg",
     accentColor: "#0c8ee9",
     screenshots: [
       "/products/splitmate/screenshot-01.png",
@@ -56,47 +75,35 @@ export const products: Product[] = [
     ],
     features: [
       {
-        title: "Split Expenses Easily",
+        title: "Split Expenses",
         description:
-          "Equal splits, custom percentages, or exact amounts — handle any shared bill in seconds.",
+          "Track shared expenses and divide costs clearly between group members.",
         icon: "Receipt",
       },
       {
         title: "Track Balances",
         description:
-          "Instant overview of overall balances between friends or within groups with zero mathematical errors.",
+          "See who owes whom at a glance with clear, accurate balance updates.",
         icon: "Scale",
       },
       {
         title: "Manage Groups",
         description:
-          "Organize shared costs by trip, apartment, dinner party, or recurring monthly expenses.",
+          "Keep trips, roommates, dinners, and other shared expenses organized.",
         icon: "Users",
       },
       {
-        title: "Invite Friends & Sync",
+        title: "Settle Up",
         description:
-          "Seamlessly collaborate with group members using real-time synchronization.",
-        icon: "UserPlus",
-      },
-      {
-        title: "Keep Expenses Organized",
-        description:
-          "Categorize spending, attach receipt details, and filter transaction logs effortlessly.",
-        icon: "FolderKanban",
-      },
-      {
-        title: "Simple & Transparent",
-        description:
-          "Smart debt simplification algorithm reduces total transactions needed to settle balances.",
+          "Make it easier to understand and settle outstanding balances effortlessly.",
         icon: "Sparkles",
       },
     ],
     whyItExists: {
       problem:
-        "Group travel, shared housing, and casual outings often devolve into messy spreadsheets, forgotten payments, and uncomfortable money conversations.",
+        "Group travel, shared housing, and casual dinners often turn into confusing spreadsheets, forgotten payments, and awkward money conversations.",
       solution:
-        "SplitMate eliminates friction with an intuitive mobile experience designed for instant expense logging, automatic debt simplification, and clear balance transparency.",
+        "SplitMate eliminates friction with a clean mobile experience designed for instant expense logging, group tracking, and balance settlement.",
     },
     howItWorks: [
       {
@@ -106,23 +113,76 @@ export const products: Product[] = [
       },
       {
         step: 2,
-        title: "Log Shared Expenses",
-        description: "Add bills as they happen, specifying who paid and how to split.",
+        title: "Add an Expense",
+        description: "Log bills as they happen, specifying who paid and who shares the cost.",
       },
       {
         step: 3,
-        title: "See Instant Balances",
-        description: "SplitMate automatically calculates net balances and minimizes total repayments.",
+        title: "Split the Expense",
+        description: "SplitMate automatically divides the bill and updates individual shares.",
       },
       {
         step: 4,
-        title: "Settle Up Effortlessly",
-        description: "Mark balances as settled with a single tap as debts are repaid.",
+        title: "Track & Settle Balances",
+        description: "Review net balances and mark items as settled when payments are made.",
       },
     ],
-    // Set official Google Play URL here when public
+    faq: [
+      {
+        question: "What is SplitMate?",
+        answer:
+          "SplitMate is a mobile application developed by Fyndra Labs designed to help friends, roommates, and groups track shared expenses and settle balances simply.",
+      },
+      {
+        question: "How does SplitMate calculate group balances?",
+        answer:
+          "When you add an expense, SplitMate updates the net balance for each group member so everyone knows exactly what they owe or are owed.",
+      },
+      {
+        question: "Is SplitMate free to use?",
+        answer:
+          "Yes, SplitMate core expense splitting and group tracking features are free to use.",
+      },
+      {
+        question: "How do I request account or data deletion?",
+        answer:
+          "You can request deletion of your account and personal data anytime by visiting the Delete Account page at /products/splitmate/delete-account.",
+      },
+    ],
+    useCases: [
+      {
+        title: "Trip",
+        description: "Keep track of flights, hotels, meals, and activities on group vacations.",
+        iconName: "Plane",
+      },
+      {
+        title: "Family",
+        description: "Manage shared household expenses, family outings, and group gifts.",
+        iconName: "Users",
+      },
+      {
+        title: "Couple",
+        description: "Track shared living costs, date nights, and joint budgets seamlessly.",
+        iconName: "Heart",
+      },
+      {
+        title: "Flatmate",
+        description: "Share rent, utility bills, groceries, and household supplies effortlessly.",
+        iconName: "Home",
+      },
+      {
+        title: "& Other",
+        description: "Organize dinners, casual hangouts, office teams, and event expenses.",
+        iconName: "Sparkles",
+      },
+    ],
+    // Set official Google Play URL here when live on the store
     playStoreUrl: "",
     websiteUrl: "https://fyndralabs.com/products/splitmate",
+    supportEmail: "support@fyndralabs.com",
+    privacyUrl: "/products/splitmate/privacy",
+    termsUrl: "/products/splitmate/terms",
+    deleteAccountUrl: "/products/splitmate/delete-account",
     isFeatured: true,
     status: "Active",
     releaseYear: "2026",

@@ -3,8 +3,6 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/config";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -72,16 +70,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={roboto.variable} suppressHydrationWarning>
-      <body className="font-sans antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen bg-white dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100">
+      <body className="font-sans antialiased selection:bg-brand-500 selection:text-white min-h-screen bg-white dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange={false}
         >
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          {children}
         </ThemeProvider>
       </body>
     </html>
