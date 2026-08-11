@@ -21,7 +21,7 @@ export function Footer() {
               className="inline-flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg"
               aria-label="Fyndra Labs Home"
             >
-              <div className="relative w-10 h-10 shrink-0">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 shrink-0">
                 <Image
                   src={siteConfig.assets.icon}
                   alt={`${siteConfig.name} Icon`}
@@ -30,8 +30,8 @@ export function Footer() {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-[20px] font-bold tracking-tight text-slate-900 dark:text-white">
-                {siteConfig.name}
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-brand-500">
+                FyndraLabs
               </span>
             </Link>
             <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-[15px] leading-relaxed max-w-md">

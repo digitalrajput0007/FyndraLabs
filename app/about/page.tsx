@@ -66,20 +66,19 @@ export default function AboutPage() {
             {/* Studio Box */}
             <div className="lg:col-span-5">
               <div className="rounded-3xl p-6 sm:p-8 bg-slate-900 text-white border border-slate-800 shadow-xl space-y-5">
-                <div className="flex items-center gap-3.5 pb-4 border-b border-slate-800">
-                  <div className="relative w-10 h-10 shrink-0">
+                <div className="flex items-center gap-3 pb-4 border-b border-slate-800">
+                  <div className="relative w-9 h-9 shrink-0">
                     <Image
                       src={siteConfig.assets.icon}
                       alt={`${siteConfig.name} Icon`}
-                      width={40}
-                      height={40}
+                      width={36}
+                      height={36}
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-white text-lg">{siteConfig.name}</h3>
-                    <p className="text-xs text-slate-400">Independent Product Studio</p>
-                  </div>
+                  <span className="text-xl font-extrabold tracking-tight text-brand-400">
+                    FyndraLabs
+                  </span>
                 </div>
 
                 <div className="space-y-3 text-xs sm:text-sm">
