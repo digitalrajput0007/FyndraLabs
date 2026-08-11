@@ -1,19 +1,29 @@
 export const siteConfig = {
   name: "Fyndra Labs",
   legalName: "Fyndra Labs LLC",
-  tagline: "We build digital products people love to use.",
+  tagline: "Software that makes everyday life simpler.",
   description:
-    "Fyndra Labs creates simple, useful, and thoughtfully designed software products and mobile applications that solve everyday problems.",
+    "Fyndra Labs creates simple, useful, and thoughtfully designed software products and mobile applications that solve real-world problems.",
   url: "https://fyndralabs.com",
+  
+  // Single centralized support email configuration
   supportEmail: "support@fyndralabs.com",
   contactEmail: "contact@fyndralabs.com",
   
-  // Social links - leave empty or undefined if not created yet
+  // Centralized Brand Asset Paths
+  assets: {
+    logo: "/brand/logo.svg",
+    logoMark: "/brand/logo-mark.svg",
+    favicon: "/brand/logo-mark.svg",
+    ogImage: "/brand/og-image.svg",
+  },
+
+  // Social links - populated dynamically if non-empty
   socialLinks: {
     twitter: "",
     github: "",
     linkedin: "",
-    googlePlay: "https://play.google.com/store/apps/dev?id=fyndralabs",
+    googlePlay: "",
   },
 
   brandColors: {

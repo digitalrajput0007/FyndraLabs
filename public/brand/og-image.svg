@@ -1,0 +1,21 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0B0F17"/>
+  <circle cx="600" cy="315" r="400" fill="url(#og-glow)" opacity="0.15"/>
+  <rect x="100" y="100" width="80" height="80" rx="24" fill="url(#og-brand-grad)"/>
+  <path d="M125 125H155V137H137V145H151V157H125V125Z" fill="white"/>
+  <text x="205" y="155" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="42" fill="#FFFFFF">Fyndra Labs</text>
+  <text x="100" y="290" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="56" fill="#FFFFFF">Software that makes everyday life simpler.</text>
+  <text x="100" y="360" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="28" fill="#94A3B8">Modern software and mobile application studio • Creator of SplitMate</text>
+  <rect x="100" y="440" width="220" height="54" rx="16" fill="#0C8EE9"/>
+  <text x="140" y="475" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#FFFFFF">fyndralabs.com</text>
+  <defs>
+    <radialGradient id="og-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 315) rotate(90) scale(400)">
+      <stop stop-color="#0C8EE9"/>
+      <stop offset="1" stop-color="#0B0F17" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="og-brand-grad" x1="100" y1="100" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0C8EE9"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+</svg>

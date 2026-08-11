@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
+  icons: {
+    icon: siteConfig.assets.logoMark,
+    shortcut: siteConfig.assets.logoMark,
+    apple: siteConfig.assets.logoMark,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -38,11 +43,20 @@ export const metadata: Metadata = {
     title: `${siteConfig.name} | Software & Mobile App Studio`,
     description: siteConfig.description,
     siteName: siteConfig.name,
+    images: [
+      {
+        url: siteConfig.assets.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} Open Graph Card`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | Software & Mobile App Studio`,
     description: siteConfig.description,
+    images: [siteConfig.assets.ogImage],
   },
   robots: {
     index: true,

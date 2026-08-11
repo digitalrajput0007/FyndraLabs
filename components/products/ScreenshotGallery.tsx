@@ -49,7 +49,7 @@ export function ScreenshotGallery({ productName }: ScreenshotGalleryProps) {
           <button
             key={idx}
             onClick={() => setActiveScreen(idx)}
-            className={`p-3.5 rounded-xl border text-left transition-all ${
+            className={`p-3 rounded-xl border text-left transition-all ${
               activeScreen === idx
                 ? "bg-white dark:bg-slate-900 border-brand-500 shadow-md ring-2 ring-brand-500/20"
                 : "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
@@ -65,26 +65,26 @@ export function ScreenshotGallery({ productName }: ScreenshotGalleryProps) {
         ))}
       </div>
 
-      {/* Featured Screenshot Visual Card */}
-      <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 overflow-hidden shadow-lg">
+      {/* Featured Screenshot Card */}
+      <div className="relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 overflow-hidden shadow-md">
         <div
           className={`absolute inset-0 bg-gradient-to-br ${screens[activeScreen].color} opacity-60 pointer-events-none`}
         />
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 justify-between">
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 justify-between">
           <div className="space-y-3 max-w-md">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-brand-500" />
               {productName} Interface Feature
             </span>
-            <h4 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h4 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               {screens[activeScreen].title}
             </h4>
-            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-              {screens[activeScreen].subtitle}. Built with focus on micro-interactions, dark mode compatibility, and swift performance.
+            <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
+              {screens[activeScreen].subtitle}. Engineered with focus on clarity, dark mode compatibility, and fast performance.
             </p>
           </div>
 
-          {/* Interactive Phone Screen Representation */}
+          {/* Screen Representation */}
           <div className="w-full max-w-xs rounded-2xl p-4 bg-slate-950 text-white shadow-xl border border-slate-800 space-y-3">
             <div className="flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800 pb-2">
               <span className="font-semibold text-white">{productName} App Preview</span>
@@ -96,10 +96,10 @@ export function ScreenshotGallery({ productName }: ScreenshotGalleryProps) {
               <div className="h-2 bg-slate-800 rounded-full w-4/5" />
             </div>
             <div className="grid grid-cols-2 gap-2 text-[10px]">
-              <div className="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-semibold">
+              <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-semibold">
                 +$85.00 Settled
               </div>
-              <div className="p-2.5 rounded-lg bg-brand-950/60 border border-brand-800/60 text-brand-300 font-semibold">
+              <div className="p-2 rounded-lg bg-brand-950/60 border border-brand-800/60 text-brand-300 font-semibold">
                 Auto-Calculated
               </div>
             </div>

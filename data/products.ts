@@ -15,8 +15,10 @@ export interface Product {
   slug: string;
   category: string;
   tagline: string;
+  shortDescription: string;
   description: string;
   logo: string;
+  icon: string;
   accentColor: string;
   screenshots: string[];
   features: ProductFeature[];
@@ -28,7 +30,7 @@ export interface Product {
   playStoreUrl?: string;
   websiteUrl?: string;
   isFeatured: boolean;
-  status: "Active" | "Beta" | "In Development" | "Planned";
+  status: "Active" | "In Development";
   releaseYear: string;
 }
 
@@ -36,17 +38,21 @@ export const products: Product[] = [
   {
     name: "SplitMate",
     slug: "splitmate",
-    category: "Finance / Expense Management",
+    category: "Expense Management",
     tagline: "Split expenses, manage shared costs, and track balances effortlessly.",
-    description:
+    shortDescription:
       "Split expenses, manage shared costs, and keep track of who owes what — without the usual confusion.",
-    logo: "/products/splitmate/logo.svg",
+    description:
+      "SplitMate is a mobile application developed by Fyndra Labs that simplifies shared expense splitting, group balances, and debt resolution.",
+    logo: "/products/splitmate/icon.svg",
+    icon: "/products/splitmate/icon.svg",
     accentColor: "#0c8ee9",
     screenshots: [
-      "/products/splitmate/screenshot-1.png",
-      "/products/splitmate/screenshot-2.png",
-      "/products/splitmate/screenshot-3.png",
-      "/products/splitmate/screenshot-4.png",
+      "/products/splitmate/screenshot-01.png",
+      "/products/splitmate/screenshot-02.png",
+      "/products/splitmate/screenshot-03.png",
+      "/products/splitmate/screenshot-04.png",
+      "/products/splitmate/screenshot-05.png",
     ],
     features: [
       {
@@ -114,86 +120,11 @@ export const products: Product[] = [
         description: "Mark balances as settled with a single tap as debts are repaid.",
       },
     ],
+    // Set official Google Play URL here when public
     playStoreUrl: "",
     websiteUrl: "https://fyndralabs.com/products/splitmate",
     isFeatured: true,
     status: "Active",
-    releaseYear: "2026",
-  },
-  {
-    name: "TaskPulse",
-    slug: "taskpulse",
-    category: "Productivity / Time Management",
-    tagline: "Focused daily execution and distraction-free task tracking.",
-    description:
-      "A distraction-free task & time tracking app built to help individuals prioritize high-impact daily goals without workflow clutter.",
-    logo: "/products/taskpulse/logo.svg",
-    accentColor: "#10b981",
-    screenshots: [],
-    features: [
-      {
-        title: "Focus Timers",
-        description: "Integrated Pomodoro & custom deep-work intervals.",
-        icon: "Zap",
-      },
-      {
-        title: "Priority Matrix",
-        description: "Auto-sort tasks by urgency and importance.",
-        icon: "FolderKanban",
-      },
-      {
-        title: "Daily Reflections",
-        description: "Quick 60-second end-of-day accomplishment logs.",
-        icon: "Sparkles",
-      },
-    ],
-    whyItExists: {
-      problem: "Traditional task managers are bloated with complex kanban boards and unnecessary configuration.",
-      solution: "TaskPulse cuts out noise and keeps your attention strictly on completing today's 3 key priorities.",
-    },
-    howItWorks: [
-      { step: 1, title: "List Daily 3", description: "Choose 3 high-impact tasks for today." },
-      { step: 2, title: "Start Timer", description: "Focus with zero notifications during intervals." },
-      { step: 3, title: "Track Progress", description: "Review daily streak metrics." },
-    ],
-    playStoreUrl: "",
-    isFeatured: false,
-    status: "In Development",
-    releaseYear: "2026",
-  },
-  {
-    name: "HabitFlow",
-    slug: "habitflow",
-    category: "Health & Lifestyle",
-    tagline: "Build sustainable habits with minimalist streak tracking.",
-    description:
-      "A simple, beautiful habit tracker designed around momentum, micro-steps, and positive reinforcement.",
-    logo: "/products/habitflow/logo.svg",
-    accentColor: "#8b5cf6",
-    screenshots: [],
-    features: [
-      {
-        title: "Visual Streaks",
-        description: "Track progress with clean, satisfying heatmaps.",
-        icon: "Sparkles",
-      },
-      {
-        title: "Smart Reminders",
-        description: "Contextual prompts that fit your daily routine.",
-        icon: "Zap",
-      },
-    ],
-    whyItExists: {
-      problem: "Habit apps often overwhelm users with rigid point systems and punishment mechanics.",
-      solution: "HabitFlow focuses on frictionless consistency and flexible streak recovery.",
-    },
-    howItWorks: [
-      { step: 1, title: "Define Habit", description: "Pick a simple daily habit." },
-      { step: 2, title: "Check Off", description: "Tap to record daily completion." },
-    ],
-    playStoreUrl: "",
-    isFeatured: false,
-    status: "Planned",
     releaseYear: "2026",
   },
 ];
