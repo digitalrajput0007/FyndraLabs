@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/lib/config";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -36,7 +37,7 @@ export function Navbar() {
       >
         <div className="flex items-center justify-between h-[68px] sm:h-[76px] px-3 sm:px-5">
 
-          {/* LEFT: 1.5x Scaled Icon + Blue FyndraLabs Text */}
+          {/* LEFT: 1.5x Scaled Icon + FyndraLabs Text */}
           <Link
             href="/"
             className="flex items-center gap-3 shrink-0 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg"
@@ -52,7 +53,7 @@ export function Navbar() {
                 priority
               />
             </div>
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-500 group-hover:text-brand-600 transition-colors">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-500 dark:text-brand-400 group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
               FyndraLabs
             </span>
           </Link>
@@ -84,8 +85,9 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* RIGHT: Actions */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* RIGHT: Theme Toggle + CTA Action */}
+          <div className="hidden md:flex items-center gap-2.5">
+            <ThemeToggle />
             <Link
               href="/products"
               className="inline-flex items-center justify-center gap-1.5 px-5 h-[38px] text-[14px] font-semibold rounded-full text-white bg-brand-500 hover:bg-brand-600 transition-colors duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-[#0f1525]"
@@ -95,8 +97,9 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile: Hamburger */}
+          {/* Mobile: Theme Toggle + Hamburger */}
           <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
