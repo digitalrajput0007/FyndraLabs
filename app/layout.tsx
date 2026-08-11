@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/config";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const roboto = Roboto({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  weight: ["300", "400", "500", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -32,9 +33,9 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
   icons: {
-    icon: siteConfig.assets.logoMark,
-    shortcut: siteConfig.assets.logoMark,
-    apple: siteConfig.assets.logoMark,
+    icon: siteConfig.assets.favicon,
+    shortcut: siteConfig.assets.favicon,
+    apple: siteConfig.assets.favicon,
   },
   openGraph: {
     type: "website",
@@ -70,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={plusJakartaSans.variable} suppressHydrationWarning>
+    <html lang="en" className={roboto.variable} suppressHydrationWarning>
       <body className="font-sans antialiased selection:bg-brand-500 selection:text-white flex flex-col min-h-screen bg-white dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100">
         <ThemeProvider
           attribute="class"

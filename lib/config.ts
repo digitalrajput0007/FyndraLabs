@@ -4,21 +4,19 @@ export const siteConfig = {
   tagline: "Software that makes everyday life simpler.",
   description:
     "Fyndra Labs creates simple, useful, and thoughtfully designed software products and mobile applications that solve real-world problems.",
-  url: "https://fyndralabs.com",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://fyndralabs.com",
   
-  // Single centralized support email configuration
   supportEmail: "support@fyndralabs.com",
   contactEmail: "contact@fyndralabs.com",
   
-  // Centralized Brand Asset Paths
+  // Official Brand Assets
   assets: {
-    logo: "/brand/logo.svg",
-    logoMark: "/brand/logo-mark.svg",
-    favicon: "/brand/logo-mark.svg",
-    ogImage: "/brand/og-image.svg",
+    icon: "/brand/fyndra-labs-icon.png",
+    logo: "/brand/fyndra-labs-logo.png",
+    favicon: "/brand/favicon.png",
+    ogImage: "/brand/fyndra-labs-og.png",
   },
 
-  // Social links - populated dynamically if non-empty
   socialLinks: {
     twitter: "",
     github: "",

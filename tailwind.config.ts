@@ -34,7 +34,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["var(--font-sans)", "Roboto", "system-ui", "-apple-system", "sans-serif"],
       },
       animation: {
         "float": "float 6s ease-in-out infinite",

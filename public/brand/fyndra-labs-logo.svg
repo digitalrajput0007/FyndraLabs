@@ -1,0 +1,11 @@
+<svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="14" fill="url(#fyndra-logo-grad)"/>
+  <path d="M16 16H32V22H22V26H30V32H16V16Z" fill="white"/>
+  <text x="60" y="30" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="20" fill="#0F172A">Fyndra Labs</text>
+  <defs>
+    <linearGradient id="fyndra-logo-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0C8EE9"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+</svg>
