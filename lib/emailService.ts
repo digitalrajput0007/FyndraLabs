@@ -15,108 +15,189 @@ export interface EmailResult {
   userEmailId?: string;
 }
 
+export interface AdminActionEmailResult {
+  status: "SENT" | "FAILED";
+  emailId?: string;
+}
+
+export interface SendSupportNotificationParams {
+  requestId: string;
+  fullName: string;
+  email: string;
+  reason: string;
+  createdAt: string;
+}
+
+export interface SendVerificationEmailParams {
+  requestId: string;
+  fullName: string;
+  email: string;
+  verificationLink: string;
+}
+
+export interface SendAdminActionEmailParams {
+  requestId: string;
+  fullName: string;
+  email: string;
+  rejectionReason?: string;
+}
+
 /**
- * Server-only helper to send support notification & user confirmation emails via Resend.
- * Safely handles missing API keys or network errors without throwing or losing Firestore records.
+ * Sends Internal Support Notification Email to support@fyndralabs.com immediately upon submission.
+ * Does NOT contain the secret verification token.
  */
-export async function sendDeletionEmails(params: SendDeletionEmailsParams): Promise<EmailResult> {
+export async function sendSupportNotificationEmail(params: SendSupportNotificationParams): Promise<AdminActionEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-
-  const result: EmailResult = {
-    supportStatus: "FAILED",
-    userStatus: "FAILED",
-  };
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   if (!apiKey) {
-    console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
-    return result;
+    console.warn("[SplitMate Support Email]: RESEND_API_KEY environment variable is not configured.");
+    return { status: "FAILED" };
   }
 
   const resend = new Resend(apiKey);
   const { requestId, fullName, email, reason, createdAt } = params;
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
-  // 1. Support Notification Email Template
-  const supportHtml = `
+  const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New SplitMate Account Deletion Request</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; color: #1e293b; margin: 0; padding: 20px; }
-          .card { background-color: #ffffff; border-radius: 8px; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; }
-          .logo-bar { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 24px; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
-          .header { font-size: 20px; font-weight: 700; color: #0065F2; margin-bottom: 20px; }
-          .badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-weight: 600; font-size: 12px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-          .field { margin-bottom: 12px; }
-          .label { font-weight: 600; color: #64748b; font-size: 13px; text-transform: uppercase; margin-bottom: 2px; }
-          .value { font-size: 15px; color: #0f172a; }
-          .notice { margin-top: 24px; padding: 12px; background-color: #eff6ff; border-left: 4px solid #0065F2; font-size: 13px; color: #1e40af; border-radius: 0 4px 4px 0; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
+          .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { width: 120px !important; max-width: 120px !important; height: auto !important; display: block !important; margin: 0 auto !important; border: 0 !important; }
+          .content { padding: 32px; }
+          .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
+          p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
+          .section-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 8px 0; }
+          .details-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+          .detail-row { display: table; width: 100%; margin-bottom: 10px; }
+          .detail-row:last-child { margin-bottom: 0; }
+          .detail-label { display: table-cell; font-size: 13px; font-weight: 600; color: #64748b; vertical-align: middle; width: 140px; }
+          .detail-value { display: table-cell; font-size: 14px; color: #0f172a; vertical-align: middle; }
+          .code-id { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #1e293b; }
+          .status-badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+          .notice-box { background-color: #eff6ff; border-left: 4px solid #0065F2; padding: 14px; font-size: 13px; color: #1e40af; border-radius: 0 4px 4px 0; margin-top: 16px; line-height: 1.5; }
+          .footer { background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
+          .footer strong { color: #64748b; font-weight: 600; }
         </style>
       </head>
       <body>
-        <div class="card">
-          <div class="logo-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
-          </div>
-          <div class="header">SplitMate &bull; Account Deletion Request</div>
-          
-          <div class="field">
-            <div class="label">Request ID</div>
-            <div class="value"><code>${requestId}</code> &nbsp; <span class="badge">PENDING</span></div>
+        <div class="container">
+          <div class="header-bar">
+            <img src="${logoUrl}" width="120" height="auto" alt="SplitMate" class="logo-img" style="display:block;width:120px;max-width:120px;height:auto;margin:0 auto;border:0;" />
           </div>
 
-          <div class="field">
-            <div class="label">Submitted At</div>
-            <div class="value">${createdAt}</div>
+          <div class="content">
+            <h1 class="headline">New SplitMate Account Deletion Request</h1>
+
+            <p>A new account deletion request has been submitted on SplitMate.</p>
+
+            <div class="section-label">REQUEST DETAILS</div>
+            <div class="details-card">
+              <div class="detail-row">
+                <div class="detail-label">Request ID</div>
+                <div class="detail-value"><span class="code-id">${requestId}</span></div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">User Full Name</div>
+                <div class="detail-value">${escapeHtml(fullName)}</div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">User Email</div>
+                <div class="detail-value">${escapeHtml(email)}</div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Submitted Timestamp</div>
+                <div class="detail-value">${escapeHtml(createdAt)}</div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Reason</div>
+                <div class="detail-value">${escapeHtml(reason || "None provided")}</div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Verification Status</div>
+                <div class="detail-value"><span class="status-badge">PENDING</span></div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Request Status</div>
+                <div class="detail-value"><span class="status-badge">PENDING</span></div>
+              </div>
+            </div>
+
+            <div class="notice-box">
+              <strong>Important Notice:</strong> Email verification is required before this request can be approved.
+            </div>
           </div>
 
-          <div class="field">
-            <div class="label">Source</div>
-            <div class="value">Web Form</div>
-          </div>
-
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-
-          <div class="field">
-            <div class="label">User Name</div>
-            <div class="value">${escapeHtml(fullName)}</div>
-          </div>
-
-          <div class="field">
-            <div class="label">Account Email</div>
-            <div class="value">${escapeHtml(email)}</div>
-          </div>
-
-          <div class="field">
-            <div class="label">Reason Given</div>
-            <div class="value">${escapeHtml(reason || "None provided")}</div>
-          </div>
-
-          <div class="notice">
-            This request has been recorded in the SplitMate <code>deletionRequests</code> collection and requires review before account deletion is performed.
+          <div class="footer">
+            <strong>SplitMate Administration</strong><br />
+            Fyndra Labs Internal Notification
           </div>
         </div>
       </body>
     </html>
   `;
 
-  // 2. User Confirmation Email Template
-  const userHtml = `
+  try {
+    const recipientDomain = supportEmail.split("@")[1] || "fyndralabs.com";
+    console.log(`[SplitMate Email] Sending internal support notification for request ${requestId} to support@${recipientDomain}...`);
+
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: [supportEmail],
+      subject: `New SplitMate account deletion request — ${requestId}`,
+      html,
+    });
+
+    if (error) {
+      console.error(`[SplitMate Email Error - Support Notification] Request: ${requestId}, Recipient: ${supportEmail}, Code: ${error.name || "RESEND_ERROR"}, Message: ${error.message}`);
+      return { status: "FAILED" };
+    }
+
+    console.log(`[SplitMate Email Success - Support Notification] Request: ${requestId}, Recipient: ${supportEmail}, MessageId: ${data?.id}`);
+    return { status: "SENT", emailId: data?.id };
+  } catch (err) {
+    console.error(`[SplitMate Email Exception - Support Notification] Request: ${requestId}, Recipient: ${supportEmail}, Message: ${err instanceof Error ? err.message : String(err)}`);
+    return { status: "FAILED" };
+  }
+}
+
+/**
+ * Sends Email Verification Token link to the customer before deletion processing.
+ */
+export async function sendVerificationEmail(params: SendVerificationEmailParams): Promise<AdminActionEmailResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
+  const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
+
+  if (!apiKey) {
+    console.warn("[SplitMate Customer Email]: RESEND_API_KEY environment variable is not configured.");
+    return { status: "FAILED" };
+  }
+
+  const resend = new Resend(apiKey);
+  const { requestId, fullName, email, verificationLink } = params;
+
+  const html = `
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SplitMate Deletion Request</title>
+        <title>Verify SplitMate Account Deletion</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
+          .logo-img { width: 120px !important; max-width: 120px !important; height: auto !important; display: block !important; margin: 0 auto !important; border: 0 !important; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -128,6 +209,9 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
           .detail-value { display: table-cell; font-size: 14px; color: #0f172a; vertical-align: middle; }
           .code-id { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #1e293b; }
           .status-badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+          .btn-container { margin: 28px 0; text-align: center; }
+          .btn { display: inline-block; background-color: #0065F2; color: #ffffff !important; font-size: 14px; font-weight: 700; padding: 14px 28px; border-radius: 8px; text-decoration: none; letter-spacing: 0.3px; }
+          .fallback-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; margin-top: 16px; word-break: break-all; font-size: 12px; color: #475569; }
           .footer { background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
           .footer strong { color: #64748b; font-weight: 600; }
         </style>
@@ -135,11 +219,11 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
       <body>
         <div class="container">
           <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+            <img src="${logoUrl}" width="120" height="auto" alt="SplitMate" class="logo-img" style="display:block;width:120px;max-width:120px;height:auto;margin:0 auto;border:0;" />
           </div>
 
           <div class="content">
-            <h1 class="headline">Your deletion request has been received</h1>
+            <h1 class="headline">Verify your account deletion request</h1>
 
             <p>Hello ${escapeHtml(fullName)},</p>
             <p>We've received your request to delete your SplitMate account.</p>
@@ -156,12 +240,29 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
               </div>
             </div>
 
-            <div class="section-label">WHAT HAPPENS NEXT</div>
-            <p>We'll verify your request and process the deletion once authorized.</p>
-            <p>Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.</p>
+            <p>To confirm that you own this email address and authorize this account deletion request, please verify your email address using the button below:</p>
 
-            <p style="margin-top: 24px; font-size: 14px; color: #64748b;">
-              If you did not submit this request, please contact: <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>
+            <div class="btn-container">
+              <a href="${verificationLink}" class="btn" target="_blank">VERIFY EMAIL ADDRESS</a>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
+              This verification link expires in 24 hours and can only be used once.
+            </p>
+
+            <p style="font-size: 13px; color: #64748b;">
+              Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.
+            </p>
+
+            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
+              If the button above does not work, copy and paste this link into your browser:
+            </p>
+            <div class="fallback-box">
+              <a href="${verificationLink}" style="color: #0065F2; text-decoration: underline;">${verificationLink}</a>
+            </div>
+
+            <p style="margin-top: 24px; font-size: 13px; color: #64748b;">
+              If you did not submit this request, no action is required. You can also contact support at <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>.
             </p>
           </div>
 
@@ -174,62 +275,32 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
     </html>
   `;
 
-  // Attempt Support Email
   try {
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [supportEmail],
-      subject: `[SplitMate] New Account Deletion Request — ${requestId}`,
-      html: supportHtml,
-    });
+    const userDomain = email.split("@")[1] || "domain";
+    console.log(`[SplitMate Email] Sending verification link for request ${requestId} to user domain @${userDomain}...`);
 
-    if (error) {
-      console.error("[SplitMate Email Error - Support]:", error.message);
-    } else if (data) {
-      result.supportStatus = "SENT";
-      result.supportEmailId = data.id;
-    }
-  } catch (err) {
-    console.error("[SplitMate Email Exception - Support]:", err instanceof Error ? err.message : err);
-  }
-
-  // Attempt User Confirmation Email
-  try {
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [email],
-      subject: `SplitMate account deletion request received — ${requestId}`,
-      html: userHtml,
+      subject: `Verify SplitMate account deletion — ${requestId}`,
+      html,
     });
 
     if (error) {
-      console.error("[SplitMate Email Error - User]:", error.message);
-    } else if (data) {
-      result.userStatus = "SENT";
-      result.userEmailId = data.id;
+      console.error(`[SplitMate Email Error - Verification] Request: ${requestId}, Code: ${error.name || "RESEND_ERROR"}, Message: ${error.message}`);
+      return { status: "FAILED" };
     }
+
+    console.log(`[SplitMate Email Success - Verification] Request: ${requestId}, MessageId: ${data?.id}`);
+    return { status: "SENT", emailId: data?.id };
   } catch (err) {
-    console.error("[SplitMate Email Exception - User]:", err instanceof Error ? err.message : err);
+    console.error(`[SplitMate Email Exception - Verification] Request: ${requestId}, Message: ${err instanceof Error ? err.message : String(err)}`);
+    return { status: "FAILED" };
   }
-
-  return result;
-}
-
-export interface SendAdminActionEmailParams {
-  requestId: string;
-  fullName: string;
-  email: string;
-  rejectionReason?: string;
-}
-
-export interface AdminActionEmailResult {
-  status: "SENT" | "FAILED";
-  emailId?: string;
 }
 
 /**
  * Sends User Approval Notification Email.
- * Clear statement that request is approved & scheduled for deletion (does NOT say account is already deleted).
  */
 export async function sendApprovalEmail(params: SendAdminActionEmailParams): Promise<AdminActionEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -256,7 +327,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
+          .logo-img { width: 120px !important; max-width: 120px !important; height: auto !important; display: block !important; margin: 0 auto !important; border: 0 !important; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -274,7 +345,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
       <body>
         <div class="container">
           <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+            <img src="${logoUrl}" width="120" height="auto" alt="SplitMate" class="logo-img" style="display:block;width:120px;max-width:120px;height:auto;margin:0 auto;border:0;" />
           </div>
 
           <div class="content">
@@ -331,7 +402,6 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
 
 /**
  * Sends User Rejection Notification Email.
- * Includes administrator's rejection reason.
  */
 export async function sendRejectionEmail(params: SendAdminActionEmailParams): Promise<AdminActionEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -358,7 +428,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
+          .logo-img { width: 120px !important; max-width: 120px !important; height: auto !important; display: block !important; margin: 0 auto !important; border: 0 !important; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -377,7 +447,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
       <body>
         <div class="container">
           <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+            <img src="${logoUrl}" width="120" height="auto" alt="SplitMate" class="logo-img" style="display:block;width:120px;max-width:120px;height:auto;margin:0 auto;border:0;" />
           </div>
 
           <div class="content">
@@ -435,138 +505,6 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
   }
 }
 
-export interface SendVerificationEmailParams {
-  requestId: string;
-  fullName: string;
-  email: string;
-  verificationLink: string;
-}
-
-/**
- * Sends Email Verification Token link to the user before deletion processing.
- */
-export async function sendVerificationEmail(params: SendVerificationEmailParams): Promise<AdminActionEmailResult> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
-  const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
-
-  if (!apiKey) {
-    console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
-    return { status: "FAILED" };
-  }
-
-  const resend = new Resend(apiKey);
-  const { requestId, fullName, email, verificationLink } = params;
-
-  const html = `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verify SplitMate Account Deletion</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
-          .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
-          .content { padding: 32px; }
-          .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
-          p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
-          .section-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 8px 0; }
-          .details-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
-          .detail-row { display: table; width: 100%; margin-bottom: 10px; }
-          .detail-row:last-child { margin-bottom: 0; }
-          .detail-label { display: table-cell; font-size: 13px; font-weight: 600; color: #64748b; vertical-align: middle; width: 100px; }
-          .detail-value { display: table-cell; font-size: 14px; color: #0f172a; vertical-align: middle; }
-          .code-id { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #1e293b; }
-          .status-badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
-          .btn-container { margin: 28px 0; text-align: center; }
-          .btn { display: inline-block; background-color: #0065F2; color: #ffffff !important; font-size: 14px; font-weight: 700; padding: 14px 28px; border-radius: 8px; text-decoration: none; letter-spacing: 0.3px; }
-          .fallback-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; margin-top: 16px; word-break: break-all; font-size: 12px; color: #475569; }
-          .footer { background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
-          .footer strong { color: #64748b; font-weight: 600; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" width="130" class="logo-img" />
-          </div>
-
-          <div class="content">
-            <h1 class="headline">Verify your account deletion request</h1>
-
-            <p>Hello ${escapeHtml(fullName)},</p>
-            <p>We've received your request to delete your SplitMate account.</p>
-
-            <div class="section-label">REQUEST DETAILS</div>
-            <div class="details-card">
-              <div class="detail-row">
-                <div class="detail-label">Request ID</div>
-                <div class="detail-value"><span class="code-id">${requestId}</span></div>
-              </div>
-              <div class="detail-row">
-                <div class="detail-label">Status</div>
-                <div class="detail-value"><span class="status-badge">Pending verification</span></div>
-              </div>
-            </div>
-
-            <p>To confirm that you own this email address and authorize this account deletion request, please verify your email address using the button below:</p>
-
-            <div class="btn-container">
-              <a href="${verificationLink}" class="btn" target="_blank">VERIFY EMAIL ADDRESS</a>
-            </div>
-
-            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
-              This verification link expires in 24 hours and can only be used once.
-            </p>
-
-            <p style="font-size: 13px; color: #64748b;">
-              Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.
-            </p>
-
-            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
-              If the button above does not work, copy and paste this link into your browser:
-            </p>
-            <div class="fallback-box">
-              <a href="${verificationLink}" style="color: #0065F2; text-decoration: underline;">${verificationLink}</a>
-            </div>
-
-            <p style="margin-top: 24px; font-size: 13px; color: #64748b;">
-              If you did not submit this request, no action is required. You can also contact support at <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>.
-            </p>
-          </div>
-
-          <div class="footer">
-            <strong>SplitMate</strong><br />
-            by Fyndra Labs
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
-
-  try {
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [email],
-      subject: `Verify SplitMate account deletion — ${requestId}`,
-      html,
-    });
-
-    if (error) {
-      console.error("[SplitMate Verification Email Error]:", error.message);
-      return { status: "FAILED" };
-    }
-    return { status: "SENT", emailId: data?.id };
-  } catch (err) {
-    console.error("[SplitMate Verification Email Exception]:", err instanceof Error ? err.message : err);
-    return { status: "FAILED" };
-  }
-}
-
 /**
  * Sends Final Deletion Completion Email to User.
  */
@@ -595,7 +533,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
+          .logo-img { width: 120px !important; max-width: 120px !important; height: auto !important; display: block !important; margin: 0 auto !important; border: 0 !important; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -613,7 +551,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
       <body>
         <div class="container">
           <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+            <img src="${logoUrl}" width="120" height="auto" alt="SplitMate" class="logo-img" style="display:block;width:120px;max-width:120px;height:auto;margin:0 auto;border:0;" />
           </div>
 
           <div class="content">

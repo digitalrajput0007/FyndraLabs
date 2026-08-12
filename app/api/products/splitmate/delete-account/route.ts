@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
-import { sendDeletionEmails, sendVerificationEmail } from "@/lib/emailService";
+import { sendVerificationEmail, sendSupportNotificationEmail } from "@/lib/emailService";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
@@ -35,11 +35,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Require Firebase Admin / Firestore — no fallback logging
+    // 2. Require Firebase Admin / Firestore
     const { db, app, isConfigured } = getFirebaseAdminDb();
 
     if (!isConfigured || !db || !app) {
-      // Return 503 — service not available; do not expose internal error details to the client
       return NextResponse.json(
         { error: "The account deletion service is temporarily unavailable. Please try again later or contact support." },
         { status: 503 }
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-    // Check IP submissions in last hour (Limit: 5 per hour)
     const recentIpSnap = await db
       .collection("deletionRequests")
       .where("sourceIp", "==", clientIp)
@@ -116,27 +114,44 @@ export async function POST(request: Request) {
     // Write to Firestore — success response ONLY after confirmed write
     await db.collection("deletionRequests").doc(requestId).set(deletionPayload);
 
-    // 6. Send Immediate Verification Email to User (Containing Secret Token Link)
+    // 6. Send Immediate Verification Email to Customer & Internal Support Notification Email to Fyndra Labs
     const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fyndra-labs.vercel.app";
     const baseUrl = appUrl.replace(/\/$/, "");
     const verificationLink = `${baseUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
 
-    const emailResult = await sendVerificationEmail({
+    // A) Customer Verification Email (contains verification token link)
+    const userEmailResult = await sendVerificationEmail({
       requestId,
       fullName: userFullName,
       email: userEmail,
       verificationLink,
     });
 
+    // B) Internal Support Notification Email (sent immediately to support@fyndralabs.com, NO raw token)
+    const supportEmailResult = await sendSupportNotificationEmail({
+      requestId,
+      fullName: userFullName,
+      email: userEmail,
+      reason: userReason,
+      createdAt,
+    });
+
     // 7. Update Firestore document with email delivery status
     const emailProcessedAt = new Date().toISOString();
     const updateData: Record<string, unknown> = {
-      verificationEmailStatus: emailResult.status,
+      userConfirmationEmailStatus: userEmailResult.status,
+      verificationEmailStatus: userEmailResult.status, // preserve existing field
+      supportEmailStatus: supportEmailResult.status,
       emailProcessedAt,
     };
 
-    if (emailResult.emailId) {
-      updateData.verificationEmailId = emailResult.emailId;
+    if (userEmailResult.emailId) {
+      updateData.userConfirmationEmailMessageId = userEmailResult.emailId;
+      updateData.verificationEmailId = userEmailResult.emailId; // preserve existing field
+    }
+
+    if (supportEmailResult.emailId) {
+      updateData.supportEmailMessageId = supportEmailResult.emailId;
     }
 
     try {
@@ -156,7 +171,6 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    // Do not expose internal error details (Firebase errors, stack traces) to the client
     console.error("[SplitMate Deletion API Error]:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred while processing your request. Please try again or contact support." },
