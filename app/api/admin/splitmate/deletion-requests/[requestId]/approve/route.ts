@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAdminAuth } from "@/lib/adminAuth";
 import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
-import { sendApprovalEmail, sendVerificationEmail } from "@/lib/emailService";
-import crypto from "crypto";
+import { sendApprovalEmail } from "@/lib/emailService";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +47,12 @@ export async function POST(
         return;
       }
 
+      // Phase 5 Enforcement: Must be VERIFIED before Admin Approval
+      if (docData?.requestVerificationStatus !== "VERIFIED") {
+        conflictError = "Deletion request requires user email verification before admin approval can be granted.";
+        return;
+      }
+
       const reviewedAt = new Date().toISOString();
       const updateData = {
         status: "APPROVED",
@@ -69,6 +74,7 @@ export async function POST(
         metadata: {
           previousStatus: "PENDING",
           newStatus: "APPROVED",
+          requestVerificationStatus: "VERIFIED",
         },
       });
     });
@@ -79,21 +85,7 @@ export async function POST(
 
     const currentData = (docData as unknown) as Record<string, any>;
 
-    // Generate 24-hour verification token for user safety check
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fyndralabs.com";
-    const verificationLink = `${siteUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
-
-    await docRef.update({
-      verificationTokenHash: tokenHash,
-      verificationTokenExpiresAt: expiresAt,
-      requestVerificationStatus: "PENDING_VERIFICATION",
-    });
-
-    // Phase 2B/3B Email Dispatch after Firestore transaction succeeds
+    // Send Approval Email Notification to User
     const emailResult = await sendApprovalEmail({
       requestId,
       fullName: currentData.fullName || "User",
@@ -109,13 +101,6 @@ export async function POST(
 
     try {
       await docRef.update(updateEmailData);
-      // Send verification link email
-      await sendVerificationEmail({
-        requestId,
-        fullName: currentData.fullName || "User",
-        email: currentData.email,
-        verificationLink,
-      });
     } catch (err) {
       console.error("[Admin Approval Email Status Update Error]:", err);
     }

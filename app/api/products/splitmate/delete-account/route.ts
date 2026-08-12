@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
-import { sendDeletionEmails } from "@/lib/emailService";
+import { sendDeletionEmails, sendVerificationEmail } from "@/lib/emailService";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
@@ -46,7 +46,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Duplicate PENDING Request Check (Past 24 hours)
+    // 3. Rate Limiting Check (IP & Email level via Firestore)
+    const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    // Check IP submissions in last hour (Limit: 5 per hour)
+    const recentIpSnap = await db
+      .collection("deletionRequests")
+      .where("sourceIp", "==", clientIp)
+      .get();
+
+    const ipCount = recentIpSnap.docs.filter((d) => (d.data().createdAt || "") >= oneHourAgo).length;
+    if (ipCount >= 5) {
+      return NextResponse.json(
+        { error: "Too many deletion requests submitted from your IP address. Please try again in an hour." },
+        { status: 429 }
+      );
+    }
+
+    // 4. Duplicate PENDING Request Check (Past 24 hours)
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const existingPendingSnap = await db
       .collection("deletionRequests")
@@ -65,16 +83,20 @@ export async function POST(request: Request) {
         {
           success: true,
           message: "Deletion request received",
-          detail: "Your request has been securely submitted. We will verify the request and process your account deletion.",
+          detail: "Please check your inbox. A verification link has been sent to authorize your account deletion request.",
         },
         { status: 200 }
       );
     }
 
-    // 4. Generate unique request ID
+    // 5. Generate unique request ID and 32-byte Cryptographic Verification Token
     const randomHex = crypto.randomBytes(4).toString("hex");
     const requestId = `del_sm_${Date.now()}_${randomHex}`;
     const createdAt = new Date().toISOString();
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     const deletionPayload = {
       requestId,
@@ -83,44 +105,37 @@ export async function POST(request: Request) {
       email: userEmail,
       reason: userReason,
       status: "PENDING",
+      requestVerificationStatus: "PENDING",
+      verificationTokenHash: tokenHash,
+      verificationTokenExpiresAt: tokenExpiresAt,
       createdAt,
       source: "WEB",
+      sourceIp: clientIp,
     };
 
-    // 4. Write to Firestore — success response ONLY after confirmed write
+    // Write to Firestore — success response ONLY after confirmed write
     await db.collection("deletionRequests").doc(requestId).set(deletionPayload);
 
-    // Safe Server-Side Diagnostics Log
-    const resolvedProjectId = app.options.projectId || "UNKNOWN";
-    const databaseId = "(default)";
-    console.log(
-      `[SplitMate Deletion Diagnostic]\nFirebase project ID: ${resolvedProjectId}\nFirestore database: ${databaseId}\nCollection: deletionRequests\nRequest ID: ${requestId}\nFirestore write: SUCCESS`
-    );
+    // 6. Send Immediate Verification Email to User (Containing Secret Token Link)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fyndralabs.com";
+    const verificationLink = `${siteUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
 
-    // 5. Phase 2A: Send Resend Email Notifications (Support & User)
-    const emailResult = await sendDeletionEmails({
+    const emailResult = await sendVerificationEmail({
       requestId,
       fullName: userFullName,
       email: userEmail,
-      reason: userReason,
-      createdAt,
+      verificationLink,
     });
 
-    // 6. Update Firestore document with email delivery status
+    // 7. Update Firestore document with email delivery status
     const emailProcessedAt = new Date().toISOString();
     const updateData: Record<string, unknown> = {
-      emailStatus: {
-        support: emailResult.supportStatus,
-        user: emailResult.userStatus,
-      },
+      verificationEmailStatus: emailResult.status,
       emailProcessedAt,
     };
 
-    if (emailResult.supportEmailId) {
-      updateData.supportEmailId = emailResult.supportEmailId;
-    }
-    if (emailResult.userEmailId) {
-      updateData.userEmailId = emailResult.userEmailId;
+    if (emailResult.emailId) {
+      updateData.verificationEmailId = emailResult.emailId;
     }
 
     try {
@@ -129,13 +144,13 @@ export async function POST(request: Request) {
       console.error("[SplitMate Deletion Update Email Status Error]:", updateErr);
     }
 
-    // 7. Return success — guaranteed that Firestore document exists at this point
+    // 8. Return generic success — does NOT reveal account existence or raw token
     return NextResponse.json(
       {
         success: true,
         requestId,
         message: "Deletion request received",
-        detail: "Your request has been securely submitted. We will verify the request and process your account deletion.",
+        detail: "Please check your inbox. A verification link has been sent to authorize your account deletion request.",
       },
       { status: 200 }
     );

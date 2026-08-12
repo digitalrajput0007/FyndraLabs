@@ -541,6 +541,7 @@ export default function SplitMateAdminDashboard() {
                     <th className="px-4 py-3">Email</th>
                     <th className="px-4 py-3">Reason</th>
                     <th className="px-4 py-3">Submitted</th>
+                    <th className="px-4 py-3">Verification</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
@@ -558,6 +559,17 @@ export default function SplitMateAdminDashboard() {
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
                         {new Date(req.createdAt).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {req.requestVerificationStatus === "VERIFIED" ? (
+                          <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800">
+                            VERIFIED
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600">
+                            UNVERIFIED
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {req.status === "PENDING" && (
@@ -773,7 +785,19 @@ export default function SplitMateAdminDashboard() {
 
             {selectedRequest.status === "PENDING" && (
               <div className="border-t border-slate-200 pt-4">
-                {actionType === null ? (
+                {selectedRequest.requestVerificationStatus !== "VERIFIED" ? (
+                  <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-xs flex items-center justify-between">
+                    <span className="font-semibold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-amber-600" /> Email verification required before admin approval
+                    </span>
+                    <button
+                      disabled
+                      className="px-3 py-1.5 bg-slate-200 text-slate-400 font-semibold rounded cursor-not-allowed text-xs"
+                    >
+                      Approve Disabled
+                    </button>
+                  </div>
+                ) : actionType === null ? (
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setActionType("APPROVE")}
