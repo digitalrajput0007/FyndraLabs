@@ -98,44 +98,70 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
     </html>
   `;
 
-  // 2. User Confirmation Email Template
+  // 2. User Confirmation Email Template (Redesigned for production transactional email)
   const userHtml = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SplitMate Deletion Request</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; color: #1e293b; margin: 0; padding: 20px; }
-          .card { background-color: #ffffff; border-radius: 8px; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; }
-          .brand { font-size: 20px; font-weight: 700; color: #0065F2; margin-bottom: 24px; }
-          .title { font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 16px; }
-          p { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 16px; }
-          .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin: 20px 0; }
-          .info-row { font-size: 14px; margin-bottom: 6px; }
-          .info-label { font-weight: 600; color: #64748b; }
-          .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #94a3b8; text-align: center; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
+          .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
+          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .content { padding: 32px; }
+          .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
+          p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
+          .section-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 8px 0; }
+          .details-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+          .detail-row { display: table; width: 100%; margin-bottom: 10px; }
+          .detail-row:last-child { margin-bottom: 0; }
+          .detail-label { display: table-cell; font-size: 13px; font-weight: 600; color: #64748b; vertical-align: middle; width: 100px; }
+          .detail-value { display: table-cell; font-size: 14px; color: #0f172a; vertical-align: middle; }
+          .code-id { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #1e293b; }
+          .status-badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+          .footer { background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
+          .footer strong { color: #64748b; font-weight: 600; }
         </style>
       </head>
       <body>
-        <div class="card">
-          <div class="brand">SplitMate</div>
-          <div class="title">Account Deletion Request Received</div>
-
-          <p>Hello ${escapeHtml(fullName)},</p>
-
-          <p>We received your request to delete your SplitMate account.</p>
-
-          <div class="info-box">
-            <div class="info-row"><span class="info-label">Request ID:</span> <code>${requestId}</code></div>
-            <div class="info-row"><span class="info-label">Status:</span> <strong>Pending review</strong></div>
+        <div class="container">
+          <div class="header-bar">
+            <span class="brand-logo">SplitMate</span>
           </div>
 
-          <p>We will verify and process your request. Your shared SplitMate expense and settlement records may need to be retained in anonymized form so group balances and financial history remain accurate.</p>
+          <div class="content">
+            <h1 class="headline">Your deletion request has been received</h1>
 
-          <p>If you did not submit this request, please contact our support team immediately at <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>.</p>
+            <p>Hello ${escapeHtml(fullName)},</p>
+            <p>We've received your request to delete your SplitMate account.</p>
+
+            <div class="section-label">REQUEST DETAILS</div>
+            <div class="details-card">
+              <div class="detail-row">
+                <div class="detail-label">Request ID</div>
+                <div class="detail-value"><span class="code-id">${requestId}</span></div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Status</div>
+                <div class="detail-value"><span class="status-badge">Pending review</span></div>
+              </div>
+            </div>
+
+            <div class="section-label">WHAT HAPPENS NEXT</div>
+            <p>We'll verify your request and process the deletion.</p>
+            <p>Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.</p>
+
+            <p style="margin-top: 24px; font-size: 14px; color: #64748b;">
+              If you did not submit this request, please contact: <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>
+            </p>
+          </div>
 
           <div class="footer">
-            &copy; ${new Date().getFullYear()} Fyndra Labs &bull; SplitMate Service
+            <strong>SplitMate</strong><br />
+            by Fyndra Labs
           </div>
         </div>
       </body>
