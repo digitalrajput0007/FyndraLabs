@@ -4,6 +4,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  transpilePackages: ["firebase-admin", "jwks-rsa", "jose"],
 };
 
 export default nextConfig;
