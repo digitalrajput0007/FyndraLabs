@@ -1,4 +1,8 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/admin/splitmate/deletion-requests/route": "app/api/admin/splitmate/deletion-requests/route.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js",
+  "/api/admin/splitmate/deletion-requests/[requestId]/route": "app/api/admin/splitmate/deletion-requests/[requestId]/route.js",
+  "/admin/splitmate/deletion-requests/page": "app/admin/splitmate/deletion-requests/page.js",
   "/(corporate)/page": "app/(corporate)/page.js"
 }

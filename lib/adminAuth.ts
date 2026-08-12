@@ -1,6 +1,5 @@
-import { getApps, initializeApp, cert } from "firebase-admin/app";
+import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
 
 export interface AdminUserAuthResult {
   authorized: boolean;
@@ -24,38 +23,18 @@ export async function verifyAdminAuth(authHeader: string | null): Promise<AdminU
     return { authorized: false, error: "Bearer token required.", status: 401 };
   }
 
-  const apps = getApps();
-  let adminApp = apps.length > 0 ? apps[0] : null;
+  const { db, app, isConfigured } = getFirebaseAdminDb();
 
-  if (!adminApp) {
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-
-    try {
-      if (serviceAccountJson) {
-        adminApp = initializeApp({ credential: cert(JSON.parse(serviceAccountJson)) });
-      } else if (projectId && clientEmail && privateKey) {
-        adminApp = initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
-      }
-    } catch (err) {
-      console.error("[Admin Auth SDK Init Error]:", err);
-      return { authorized: false, error: "Server authentication misconfiguration.", status: 500 };
-    }
-  }
-
-  if (!adminApp) {
+  if (!isConfigured || !db || !app) {
     return { authorized: false, error: "Firebase Admin SDK not initialized.", status: 500 };
   }
 
   try {
-    const auth = getAuth(adminApp);
+    const auth = getAuth(app);
     const decodedToken = await auth.verifyIdToken(token);
     const uid = decodedToken.uid;
     const email = decodedToken.email || "";
 
-    const db = getFirestore(adminApp);
     const adminDoc = await db.collection("admins").doc(uid).get();
 
     if (!adminDoc.exists) {
