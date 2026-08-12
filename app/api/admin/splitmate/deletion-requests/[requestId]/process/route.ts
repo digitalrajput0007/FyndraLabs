@@ -3,6 +3,7 @@ import { verifyAdminAuth } from "@/lib/adminAuth";
 import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
 import { sendCompletionEmail } from "@/lib/emailService";
 import { getAuth } from "firebase-admin/auth";
+import { FieldValue } from "firebase-admin/firestore";
 
 export const dynamic = "force-dynamic";
 
@@ -182,48 +183,81 @@ export async function POST(
     }
 
     // -------------------------------------------------------------
-    // CHECKPOINT 3: Groups Membership & Anonymization
+    // CHECKPOINT 3: Groups Membership Cleanup & Anonymization (Idempotent & Comprehensive)
     // -------------------------------------------------------------
-    if (!failureDetail && progress.groups !== "COMPLETED") {
+    if (!failureDetail) {
       try {
-        const groupsSnap = await db.collection("groups").where("memberIds", "array-contains", uidToProcess).get();
+        const groupsSnap = await db.collection("groups").get();
+
         for (const gDoc of groupsSnap.docs) {
           const gData = gDoc.data();
-          const updatedMemberIds = (gData.memberIds || []).filter((id: string) => id !== uidToProcess);
+          const hasMemberId = Array.isArray(gData.memberIds) && gData.memberIds.includes(uidToProcess);
+          const hasMember = Array.isArray(gData.members) && gData.members.some((m: any) =>
+            typeof m === "string" ? m === uidToProcess : m && m.uid === uidToProcess
+          );
+          const hasMemberDetail = Array.isArray(gData.membersDetails) && gData.membersDetails.some((m: any) => m && m.uid === uidToProcess);
+          const hasMemberProfile = gData.memberProfiles && Boolean(gData.memberProfiles[uidToProcess]);
+          const hasJoinedAt = gData.membersJoinedAt && Boolean(gData.membersJoinedAt[uidToProcess]);
+          const hasPref = gData.memberExistingExpensesPreference && Boolean(gData.memberExistingExpensesPreference[uidToProcess]);
+          const isCreator = gData.createdBy === uidToProcess;
 
-          const updateFields: Record<string, any> = {
-            memberIds: updatedMemberIds,
-            updatedAt: new Date().toISOString(),
-          };
+          if (hasMemberId || hasMember || hasMemberDetail || hasMemberProfile || hasJoinedAt || hasPref || isCreator) {
+            const updatedMemberIds = Array.isArray(gData.memberIds)
+              ? gData.memberIds.filter((id: string) => id !== uidToProcess)
+              : [];
 
-          if (Array.isArray(gData.membersDetails)) {
-            updateFields.membersDetails = gData.membersDetails.map((m: any) =>
-              m.uid === uidToProcess
-                ? { ...m, name: "Deleted User", email: null, photoUrl: null, photoThumbnailUrl: null }
-                : m
-            );
-          }
+            const updatedMembers = Array.isArray(gData.members)
+              ? gData.members.filter((m: any) =>
+                  typeof m === "string" ? m !== uidToProcess : m && m.uid !== uidToProcess
+                )
+              : gData.members;
 
-          if (gData.memberProfiles && gData.memberProfiles[uidToProcess]) {
-            updateFields[`memberProfiles.${uidToProcess}.name`] = "Deleted User";
-            updateFields[`memberProfiles.${uidToProcess}.email`] = null;
-            updateFields[`memberProfiles.${uidToProcess}.photoUrl`] = null;
-          }
+            const updateFields: Record<string, any> = {
+              memberIds: updatedMemberIds,
+              updatedAt: new Date().toISOString(),
+            };
 
-          // Handle Creator Transfer / Archive
-          if (gData.createdBy === uidToProcess) {
-            if (updatedMemberIds.length > 0) {
-              let newOwnerUid = updatedMemberIds[0];
+            if (Array.isArray(gData.members)) {
+              updateFields.members = updatedMembers;
+            }
 
-              if (Array.isArray(gData.membersDetails)) {
-                const remainingDetails = gData.membersDetails.filter(
-                  (m: any) => m.uid !== uidToProcess && updatedMemberIds.includes(m.uid)
-                );
+            if (Array.isArray(gData.membersDetails)) {
+              updateFields.membersDetails = gData.membersDetails.filter(
+                (m: any) => m && m.uid !== uidToProcess
+              );
+            }
 
-                if (remainingDetails.length > 0) {
-                  remainingDetails.sort((a: any, b: any) => {
-                    const timeA = typeof a.joinedAt === "number" ? a.joinedAt : (typeof a.joinedAt === "string" ? new Date(a.joinedAt).getTime() : Infinity);
-                    const timeB = typeof b.joinedAt === "number" ? b.joinedAt : (typeof b.joinedAt === "string" ? new Date(b.joinedAt).getTime() : Infinity);
+            if (gData.memberProfiles && gData.memberProfiles[uidToProcess]) {
+              updateFields[`memberProfiles.${uidToProcess}`] = FieldValue.delete();
+            }
+
+            if (gData.membersJoinedAt && gData.membersJoinedAt[uidToProcess]) {
+              updateFields[`membersJoinedAt.${uidToProcess}`] = FieldValue.delete();
+            }
+
+            if (gData.memberExistingExpensesPreference && gData.memberExistingExpensesPreference[uidToProcess]) {
+              updateFields[`memberExistingExpensesPreference.${uidToProcess}`] = FieldValue.delete();
+            }
+
+            // Handle Creator Transfer / Archive
+            if (isCreator) {
+              if (updatedMemberIds.length > 0) {
+                let newOwnerUid = updatedMemberIds[0];
+
+                if (Array.isArray(updateFields.membersDetails) && updateFields.membersDetails.length > 0) {
+                  const remainingDetails = [...updateFields.membersDetails].sort((a: any, b: any) => {
+                    const timeA =
+                      typeof a.joinedAt === "number"
+                        ? a.joinedAt
+                        : typeof a.joinedAt === "string"
+                        ? new Date(a.joinedAt).getTime()
+                        : Infinity;
+                    const timeB =
+                      typeof b.joinedAt === "number"
+                        ? b.joinedAt
+                        : typeof b.joinedAt === "string"
+                        ? new Date(b.joinedAt).getTime()
+                        : Infinity;
                     return timeA - timeB;
                   });
 
@@ -231,21 +265,21 @@ export async function POST(
                     newOwnerUid = remainingDetails[0].uid;
                   }
                 }
-              }
 
-              // Verify newOwnerUid is in updatedMemberIds array
-              if (updatedMemberIds.includes(newOwnerUid)) {
-                updateFields.createdBy = newOwnerUid;
+                if (updatedMemberIds.includes(newOwnerUid)) {
+                  updateFields.createdBy = newOwnerUid;
+                } else {
+                  updateFields.createdBy = updatedMemberIds[0];
+                }
               } else {
-                updateFields.createdBy = updatedMemberIds[0];
+                updateFields.isArchived = true;
               }
-            } else {
-              updateFields.isArchived = true;
             }
-          }
 
-          await gDoc.ref.update(updateFields);
+            await gDoc.ref.update(updateFields);
+          }
         }
+
         progress.groups = "COMPLETED";
         await docRef.update({ "deletionProgress.groups": "COMPLETED" });
       } catch (err: any) {
@@ -316,17 +350,36 @@ export async function POST(
     }
 
     // -------------------------------------------------------------
-    // CHECKPOINT 7: Notifications Anonymization & Cleanup
+    // CHECKPOINT 7: Notifications Anonymization & Cleanup (Idempotent & Comprehensive)
     // -------------------------------------------------------------
-    if (!failureDetail && progress.notifications !== "COMPLETED") {
+    if (!failureDetail) {
       try {
         const notifSnap = await db.collection("notifications").get();
         for (const nDoc of notifSnap.docs) {
           const nData = nDoc.data();
-          if (nData.userId === uidToProcess || nData.recipientUid === uidToProcess) {
+          const isTargetRecipient =
+            nData.userId === uidToProcess ||
+            nData.recipientUid === uidToProcess ||
+            nData.targetUid === uidToProcess;
+
+          const isTargetSender =
+            nData.senderUid === uidToProcess ||
+            nData.fromUserId === uidToProcess ||
+            (nData.data && nData.data.senderUid === uidToProcess);
+
+          if (isTargetRecipient) {
             await nDoc.ref.delete();
-          } else if (nData.data && nData.data.senderUid === uidToProcess) {
-            await nDoc.ref.update({ "data.senderName": "Deleted User" });
+          } else if (isTargetSender) {
+            const notifUpdates: Record<string, any> = {};
+            if (nData.senderName) {
+              notifUpdates.senderName = "Deleted User";
+            }
+            if (nData.data && nData.data.senderName) {
+              notifUpdates["data.senderName"] = "Deleted User";
+            }
+            if (Object.keys(notifUpdates).length > 0) {
+              await nDoc.ref.update(notifUpdates);
+            }
           }
         }
         progress.notifications = "COMPLETED";
@@ -351,8 +404,20 @@ export async function POST(
           progress.auth = "COMPLETED";
           await docRef.update({ "deletionProgress.auth": "COMPLETED" });
         } else {
-          console.error("[Checkpoint 8 Failed]:", err);
-          failureDetail = { code: "FIREBASE_AUTH_DELETION_FAILED", step: "auth", message: err.message };
+          console.error("[Checkpoint 8 Failed Server-Side Error]:", err.code || err, err.message);
+          let sanitizedCode = "FIREBASE_AUTH_DELETION_FAILED";
+          if (err.code === "auth/insufficient-permission") {
+            sanitizedCode = "FIREBASE_AUTH_INSUFFICIENT_PERMISSION";
+          } else if (err.code === "auth/internal-error") {
+            sanitizedCode = "FIREBASE_AUTH_INTERNAL_ERROR";
+          } else if (err.code === "auth/network-request-failed") {
+            sanitizedCode = "FIREBASE_AUTH_NETWORK_FAILED";
+          }
+          failureDetail = {
+            code: sanitizedCode,
+            step: "auth",
+            message: "Account deletion failed during authentication account processing.",
+          };
         }
       }
     }
