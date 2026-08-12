@@ -36,7 +36,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
 
   const resend = new Resend(apiKey);
   const { requestId, fullName, email, reason, createdAt } = params;
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   // 1. Support Notification Email Template
   const supportHtml = `
@@ -235,7 +235,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -337,7 +337,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -449,7 +449,7 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -535,7 +535,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
-  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://ik.imagekit.io/splitmateapp/notification_large.png?updatedAt=1786388742977";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
