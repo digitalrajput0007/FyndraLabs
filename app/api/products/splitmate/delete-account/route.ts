@@ -89,9 +89,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // 5. Generate unique request ID and 32-byte Cryptographic Verification Token
-    const randomHex = crypto.randomBytes(4).toString("hex");
-    const requestId = `del_sm_${Date.now()}_${randomHex}`;
+    // 5. Generate unique short request ID (e.g. DEL-8F4K2M) and 32-byte Cryptographic Verification Token
+    const randomShort = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const requestId = `DEL-${randomShort}`;
     const createdAt = new Date().toISOString();
 
     const rawToken = crypto.randomBytes(32).toString("hex");
@@ -117,8 +117,9 @@ export async function POST(request: Request) {
     await db.collection("deletionRequests").doc(requestId).set(deletionPayload);
 
     // 6. Send Immediate Verification Email to User (Containing Secret Token Link)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://fyndralabs.com";
-    const verificationLink = `${siteUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
+    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fyndra-labs.vercel.app";
+    const baseUrl = appUrl.replace(/\/$/, "");
+    const verificationLink = `${baseUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
 
     const emailResult = await sendVerificationEmail({
       requestId,

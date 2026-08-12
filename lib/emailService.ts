@@ -48,7 +48,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; color: #1e293b; margin: 0; padding: 20px; }
           .card { background-color: #ffffff; border-radius: 8px; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; }
           .logo-bar { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 24px; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .header { font-size: 20px; font-weight: 700; color: #0065F2; margin-bottom: 20px; }
           .badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-weight: 600; font-size: 12px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
           .field { margin-bottom: 12px; }
@@ -116,7 +116,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -256,7 +256,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -358,7 +358,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -470,13 +470,21 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
-          .btn-container { margin: 24px 0; text-align: center; }
-          .btn { display: inline-block; background-color: #0065F2; color: #ffffff !important; font-size: 14px; font-weight: 600; padding: 12px 24px; border-radius: 8px; text-decoration: none; }
+          .section-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 8px 0; }
+          .details-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+          .detail-row { display: table; width: 100%; margin-bottom: 10px; }
+          .detail-row:last-child { margin-bottom: 0; }
+          .detail-label { display: table-cell; font-size: 13px; font-weight: 600; color: #64748b; vertical-align: middle; width: 100px; }
+          .detail-value { display: table-cell; font-size: 14px; color: #0f172a; vertical-align: middle; }
           .code-id { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; background-color: #e2e8f0; padding: 2px 6px; border-radius: 4px; color: #1e293b; }
+          .status-badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+          .btn-container { margin: 28px 0; text-align: center; }
+          .btn { display: inline-block; background-color: #0065F2; color: #ffffff !important; font-size: 14px; font-weight: 700; padding: 14px 28px; border-radius: 8px; text-decoration: none; letter-spacing: 0.3px; }
+          .fallback-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; margin-top: 16px; word-break: break-all; font-size: 12px; color: #475569; }
           .footer { background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; text-align: center; }
           .footer strong { color: #64748b; font-weight: 600; }
         </style>
@@ -484,20 +492,51 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
       <body>
         <div class="container">
           <div class="header-bar">
-            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+            <img src="${logoUrl}" alt="SplitMate" width="130" class="logo-img" />
           </div>
 
           <div class="content">
             <h1 class="headline">Verify your account deletion request</h1>
 
             <p>Hello ${escapeHtml(fullName)},</p>
-            <p>Your deletion request (<span class="code-id">${requestId}</span>) requires email verification. Please click the button below to verify ownership of this email address and authorize your request for administrative review.</p>
+            <p>We've received your request to delete your SplitMate account.</p>
 
-            <div class="btn-container">
-              <a href="${verificationLink}" class="btn" target="_blank">Verify Deletion Request</a>
+            <div class="section-label">REQUEST DETAILS</div>
+            <div class="details-card">
+              <div class="detail-row">
+                <div class="detail-label">Request ID</div>
+                <div class="detail-value"><span class="code-id">${requestId}</span></div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Status</div>
+                <div class="detail-value"><span class="status-badge">Pending verification</span></div>
+              </div>
             </div>
 
-            <p style="font-size: 13px; color: #64748b;">This link is valid for 24 hours. If you did not request this deletion, please contact <a href="mailto:${supportEmail}" style="color: #0065F2;">${supportEmail}</a> immediately.</p>
+            <p>To confirm that you own this email address and authorize this account deletion request, please verify your email address using the button below:</p>
+
+            <div class="btn-container">
+              <a href="${verificationLink}" class="btn" target="_blank">VERIFY EMAIL ADDRESS</a>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
+              This verification link expires in 24 hours and can only be used once.
+            </p>
+
+            <p style="font-size: 13px; color: #64748b;">
+              Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.
+            </p>
+
+            <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
+              If the button above does not work, copy and paste this link into your browser:
+            </p>
+            <div class="fallback-box">
+              <a href="${verificationLink}" style="color: #0065F2; text-decoration: underline;">${verificationLink}</a>
+            </div>
+
+            <p style="margin-top: 24px; font-size: 13px; color: #64748b;">
+              If you did not submit this request, no action is required. You can also contact support at <a href="mailto:${supportEmail}" style="color: #0065F2; text-decoration: none;">${supportEmail}</a>.
+            </p>
           </div>
 
           <div class="footer">
@@ -556,7 +595,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
           .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-          .logo-img { max-width: 160px; height: auto; display: inline-block; }
+          .logo-img { width: 130px !important; max-width: 130px !important; height: auto !important; display: block; margin: 0 auto; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
