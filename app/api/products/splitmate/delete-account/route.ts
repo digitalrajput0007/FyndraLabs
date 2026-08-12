@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAdminDb } from "@/lib/firebaseAdmin";
+import { sendDeletionEmails } from "@/lib/emailService";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
@@ -71,7 +72,39 @@ export async function POST(request: Request) {
       `[SplitMate Deletion Diagnostic]\nFirebase project ID: ${resolvedProjectId}\nFirestore database: ${databaseId}\nCollection: deletionRequests\nRequest ID: ${requestId}\nFirestore write: SUCCESS`
     );
 
-    // 5. Return success — guaranteed that Firestore document exists at this point
+    // 5. Phase 2A: Send Resend Email Notifications (Support & User)
+    const emailResult = await sendDeletionEmails({
+      requestId,
+      fullName: userFullName,
+      email: userEmail,
+      reason: userReason,
+      createdAt,
+    });
+
+    // 6. Update Firestore document with email delivery status
+    const emailProcessedAt = new Date().toISOString();
+    const updateData: Record<string, unknown> = {
+      emailStatus: {
+        support: emailResult.supportStatus,
+        user: emailResult.userStatus,
+      },
+      emailProcessedAt,
+    };
+
+    if (emailResult.supportEmailId) {
+      updateData.supportEmailId = emailResult.supportEmailId;
+    }
+    if (emailResult.userEmailId) {
+      updateData.userEmailId = emailResult.userEmailId;
+    }
+
+    try {
+      await db.collection("deletionRequests").doc(requestId).update(updateData);
+    } catch (updateErr) {
+      console.error("[SplitMate Deletion Update Email Status Error]:", updateErr);
+    }
+
+    // 7. Return success — guaranteed that Firestore document exists at this point
     return NextResponse.json(
       {
         success: true,
