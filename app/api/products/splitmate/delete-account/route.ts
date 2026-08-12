@@ -46,7 +46,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Generate unique request ID
+    // 3. Duplicate PENDING Request Check (Past 24 hours)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const existingPendingSnap = await db
+      .collection("deletionRequests")
+      .where("email", "==", userEmail)
+      .where("status", "==", "PENDING")
+      .get();
+
+    const hasRecentPending = existingPendingSnap.docs.some((d) => {
+      const createdAt = d.data().createdAt;
+      return createdAt && createdAt >= twentyFourHoursAgo;
+    });
+
+    if (hasRecentPending) {
+      console.log(`[SplitMate Deletion] Duplicate PENDING request suppressed for ${userEmail}`);
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Deletion request received",
+          detail: "Your request has been securely submitted. We will verify the request and process your account deletion.",
+        },
+        { status: 200 }
+      );
+    }
+
+    // 4. Generate unique request ID
     const randomHex = crypto.randomBytes(4).toString("hex");
     const requestId = `del_sm_${Date.now()}_${randomHex}`;
     const createdAt = new Date().toISOString();

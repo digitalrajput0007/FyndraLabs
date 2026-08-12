@@ -1,9 +1,11 @@
 import { getApps, initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import fs from "fs";
+import path from "path";
 
 /**
  * Server-only Firebase Admin SDK initializer.
- * Credentials are retrieved securely from environment variables.
+ * Credentials are retrieved securely from environment variables or local fallback key.
  */
 export function getFirebaseAdminDb() {
   const apps = getApps();
@@ -33,6 +35,17 @@ export function getFirebaseAdminDb() {
           clientEmail,
           privateKey,
         }),
+      });
+      return { db: getFirestore(app), app, isConfigured: true };
+    }
+
+    // Local development fallback to SplitMate service account key
+    const localKeyPath = path.join("C:", "SplitMate", "splitmate-d2d66-firebase-adminsdk-fbsvc-c01c280d7f.json");
+    if (fs.existsSync(localKeyPath)) {
+      const localKeyContent = fs.readFileSync(localKeyPath, "utf8");
+      const parsedLocalKey = JSON.parse(localKeyContent);
+      const app = initializeApp({
+        credential: cert(parsedLocalKey),
       });
       return { db: getFirestore(app), app, isConfigured: true };
     }

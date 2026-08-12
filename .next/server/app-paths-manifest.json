@@ -1,17 +1,4 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/contact/route": "app/api/contact/route.js",
-  "/api/products/splitmate/delete-account/route": "app/api/products/splitmate/delete-account/route.js",
-  "/robots.txt/route": "app/robots.txt/route.js",
-  "/products/splitmate/delete-account/page": "app/products/splitmate/delete-account/page.js",
-  "/sitemap.xml/route": "app/sitemap.xml/route.js",
-  "/products/splitmate/privacy/page": "app/products/splitmate/privacy/page.js",
-  "/products/[slug]/page": "app/products/[slug]/page.js",
-  "/products/splitmate/terms/page": "app/products/splitmate/terms/page.js",
-  "/(corporate)/terms/page": "app/(corporate)/terms/page.js",
-  "/(corporate)/products/page": "app/(corporate)/products/page.js",
-  "/(corporate)/page": "app/(corporate)/page.js",
-  "/(corporate)/contact/page": "app/(corporate)/contact/page.js",
-  "/(corporate)/privacy-policy/page": "app/(corporate)/privacy-policy/page.js",
-  "/(corporate)/about/page": "app/(corporate)/about/page.js"
+  "/(corporate)/page": "app/(corporate)/page.js"
 }
