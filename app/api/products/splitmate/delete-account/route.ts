@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     await db.collection("deletionRequests").doc(requestId).set(deletionPayload);
 
     // 6. Send Immediate Verification Email to Customer & Internal Support Notification Email to Fyndra Labs
-    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fyndra-labs.vercel.app";
+    const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fyndralabs.com";
     const baseUrl = appUrl.replace(/\/$/, "");
     const verificationLink = `${baseUrl}/api/products/splitmate/delete-account/verify?requestId=${requestId}&token=${rawToken}`;
 
