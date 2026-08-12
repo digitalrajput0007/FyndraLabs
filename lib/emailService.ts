@@ -36,6 +36,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
 
   const resend = new Resend(apiKey);
   const { requestId, fullName, email, reason, createdAt } = params;
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
 
   // 1. Support Notification Email Template
   const supportHtml = `
@@ -46,6 +47,8 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; color: #1e293b; margin: 0; padding: 20px; }
           .card { background-color: #ffffff; border-radius: 8px; max-width: 600px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; }
+          .logo-bar { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 24px; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .header { font-size: 20px; font-weight: 700; color: #0065F2; margin-bottom: 20px; }
           .badge { display: inline-block; background-color: #fef3c7; color: #92400e; font-weight: 600; font-size: 12px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
           .field { margin-bottom: 12px; }
@@ -56,6 +59,9 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
       </head>
       <body>
         <div class="card">
+          <div class="logo-bar">
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
+          </div>
           <div class="header">SplitMate &bull; Account Deletion Request</div>
           
           <div class="field">
@@ -98,7 +104,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
     </html>
   `;
 
-  // 2. User Confirmation Email Template (Redesigned for production transactional email)
+  // 2. User Confirmation Email Template
   const userHtml = `
     <!DOCTYPE html>
     <html lang="en">
@@ -109,8 +115,8 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
-          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -129,7 +135,7 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
       <body>
         <div class="container">
           <div class="header-bar">
-            <span class="brand-logo">SplitMate</span>
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
           </div>
 
           <div class="content">
@@ -146,12 +152,12 @@ export async function sendDeletionEmails(params: SendDeletionEmailsParams): Prom
               </div>
               <div class="detail-row">
                 <div class="detail-label">Status</div>
-                <div class="detail-value"><span class="status-badge">Pending review</span></div>
+                <div class="detail-value"><span class="status-badge">Pending verification</span></div>
               </div>
             </div>
 
             <div class="section-label">WHAT HAPPENS NEXT</div>
-            <p>We'll verify your request and process the deletion.</p>
+            <p>We'll verify your request and process the deletion once authorized.</p>
             <p>Your shared SplitMate expense and settlement records may need to be retained in anonymized form so that group balances, expense history, and settlement records remain accurate for other members.</p>
 
             <p style="margin-top: 24px; font-size: 14px; color: #64748b;">
@@ -229,6 +235,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -248,8 +255,8 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
-          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -267,7 +274,7 @@ export async function sendApprovalEmail(params: SendAdminActionEmailParams): Pro
       <body>
         <div class="container">
           <div class="header-bar">
-            <span class="brand-logo">SplitMate</span>
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
           </div>
 
           <div class="content">
@@ -330,6 +337,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -349,8 +357,8 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
-          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -369,7 +377,7 @@ export async function sendRejectionEmail(params: SendAdminActionEmailParams): Pr
       <body>
         <div class="container">
           <div class="header-bar">
-            <span class="brand-logo">SplitMate</span>
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
           </div>
 
           <div class="content">
@@ -441,6 +449,7 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -460,8 +469,8 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
-          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -475,14 +484,14 @@ export async function sendVerificationEmail(params: SendVerificationEmailParams)
       <body>
         <div class="container">
           <div class="header-bar">
-            <span class="brand-logo">SplitMate</span>
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
           </div>
 
           <div class="content">
             <h1 class="headline">Verify your account deletion request</h1>
 
             <p>Hello ${escapeHtml(fullName)},</p>
-            <p>Your deletion request (<span class="code-id">${requestId}</span>) has been approved for processing. Please click the link below to verify ownership of this email address and authorize final deletion.</p>
+            <p>Your deletion request (<span class="code-id">${requestId}</span>) requires email verification. Please click the button below to verify ownership of this email address and authorize your request for administrative review.</p>
 
             <div class="btn-container">
               <a href="${verificationLink}" class="btn" target="_blank">Verify Deletion Request</a>
@@ -526,6 +535,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.RESEND_FROM_EMAIL || "SplitMate <support@fyndralabs.com>";
   const supportEmail = process.env.SUPPORT_EMAIL || "support@fyndralabs.com";
+  const logoUrl = process.env.SPLITMATE_LOGO_URL || "https://fyndra-labs.vercel.app/products/splitmate/logo.png";
 
   if (!apiKey) {
     console.warn("[SplitMate Email]: RESEND_API_KEY environment variable is not configured.");
@@ -545,8 +555,8 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 24px 12px; -webkit-font-smoothing: antialiased; }
           .container { max-width: 560px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-          .header-bar { padding: 24px 32px 16px 32px; border-bottom: 1px solid #f1f5f9; }
-          .brand-logo { font-size: 20px; font-weight: 800; color: #0065F2; letter-spacing: -0.5px; text-decoration: none; }
+          .header-bar { padding: 28px 32px 20px 32px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+          .logo-img { max-width: 160px; height: auto; display: inline-block; }
           .content { padding: 32px; }
           .headline { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.3; }
           p { font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; }
@@ -564,7 +574,7 @@ export async function sendCompletionEmail(params: SendAdminActionEmailParams): P
       <body>
         <div class="container">
           <div class="header-bar">
-            <span class="brand-logo">SplitMate</span>
+            <img src="${logoUrl}" alt="SplitMate" class="logo-img" />
           </div>
 
           <div class="content">
