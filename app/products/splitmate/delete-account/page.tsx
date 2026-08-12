@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { getProductBySlug } from "@/data/products";
 import { ProductLayout } from "@/components/products/ProductLayout";
-import { Trash2, ArrowLeft, AlertTriangle, CheckCircle2, Mail, ShieldAlert } from "lucide-react";
+import { Trash2, ArrowLeft, CheckCircle2, Mail, ShieldAlert, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function SplitMateDeleteAccountPage() {
   const product = getProductBySlug("splitmate");
@@ -16,22 +16,56 @@ export default function SplitMateDeleteAccountPage() {
     confirm: false,
   });
 
-  const [status, setStatus] = useState<"idle" | "submitting" | "submitted">("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [submissionInfo, setSubmissionInfo] = useState<{
+    requestId?: string;
+    message?: string;
+    detail?: string;
+  }>({});
 
   if (!product) {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.confirm) return;
 
     setStatus("submitting");
+    setErrorMessage("");
 
-    // Frontend submission handling: record request state & present clear resolution
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/products/splitmate/delete-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.name,
+          email: formData.email,
+          reason: formData.reason,
+          confirm: formData.confirm,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to submit deletion request. Please try again.");
+      }
+
+      setSubmissionInfo({
+        requestId: data.requestId,
+        message: data.message || "Deletion request received",
+        detail: data.detail || "Your request has been securely submitted. We will verify the request and process your account deletion.",
+      });
       setStatus("submitted");
-    }, 800);
+    } catch (err: any) {
+      console.error("[Deletion Request Submission Error]:", err);
+      setErrorMessage(err.message || "An unexpected error occurred. Please check your connection and try again.");
+      setStatus("error");
+    }
   };
 
   return (
@@ -73,7 +107,7 @@ export default function SplitMateDeleteAccountPage() {
             </ul>
           </div>
 
-          {/* Deletion Form or Confirmation */}
+          {/* Deletion Form, Error, or Success State */}
           {status === "submitted" ? (
             <div className="p-6 sm:p-8 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-slate-900 dark:text-white space-y-4">
               <div className="flex items-center gap-3">
@@ -82,18 +116,23 @@ export default function SplitMateDeleteAccountPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-200">
-                    Deletion Request Submitted
+                    {submissionInfo.message || "Deletion request received"}
                   </h3>
-                  <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300">
-                    We have received your account deletion request for <strong>{formData.email}</strong>.
+                  <p className="text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 mt-1">
+                    {submissionInfo.detail || "Your request has been securely submitted. We will verify the request and process your account deletion."}
                   </p>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200/80 dark:border-emerald-800/80 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2">
-                <p>
-                  Our team will process your request within 5–7 business days. A confirmation email will be sent once data purging is complete.
-                </p>
+                <div className="flex justify-between items-center text-xs font-mono border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <span className="text-slate-400">Reference ID:</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{submissionInfo.requestId}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs font-mono border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <span className="text-slate-400">Account Email:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{formData.email}</span>
+                </div>
                 <div className="pt-2 flex items-center gap-2 text-xs text-slate-500 font-mono">
                   <Mail className="w-3.5 h-3.5 text-brand-500" />
                   <span>Support: {product.supportEmail}</span>
@@ -108,6 +147,16 @@ export default function SplitMateDeleteAccountPage() {
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Submit Account Deletion Request
               </h3>
+
+              {status === "error" && (
+                <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs sm:text-sm flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-bold">Request Failed</p>
+                    <p>{errorMessage}</p>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div>
@@ -172,8 +221,17 @@ export default function SplitMateDeleteAccountPage() {
                   disabled={!formData.confirm || status === "submitting"}
                   className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-semibold text-xs sm:text-sm transition-colors shadow-md shadow-rose-600/20"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  <span>{status === "submitting" ? "Submitting Request..." : "Request Account Deletion"}</span>
+                  {status === "submitting" ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Submitting Request...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Request Account Deletion</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

@@ -1,4 +1,4 @@
 {
-  "/products/[slug]/page": "app/products/[slug]/page.js",
-  "/products/splitmate/delete-account/page": "app/products/splitmate/delete-account/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/products/[slug]/page": "app/products/[slug]/page.js"
 }

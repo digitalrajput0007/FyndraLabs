@@ -1299,6 +1299,15 @@ video {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+@keyframes spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
 .resize-none {
   resize: none;
 }
@@ -2117,6 +2126,10 @@ video {
   --tw-text-opacity: 1;
   color: rgb(190 18 60 / var(--tw-text-opacity, 1));
 }
+.text-rose-800 {
+  --tw-text-opacity: 1;
+  color: rgb(159 18 57 / var(--tw-text-opacity, 1));
+}
 .text-sky-400 {
   --tw-text-opacity: 1;
   color: rgb(56 189 248 / var(--tw-text-opacity, 1));
@@ -2634,6 +2647,9 @@ body {
 .dark\:bg-rose-950\/60:is(.dark *) {
   background-color: rgb(76 5 25 / 0.6);
 }
+.dark\:bg-rose-950\/80:is(.dark *) {
+  background-color: rgb(76 5 25 / 0.8);
+}
 .dark\:bg-sky-950\/60:is(.dark *) {
   background-color: rgb(8 47 73 / 0.6);
 }
@@ -2706,6 +2722,10 @@ body {
 .dark\:text-purple-300:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(216 180 254 / var(--tw-text-opacity, 1));
+}
+.dark\:text-rose-200:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(254 205 211 / var(--tw-text-opacity, 1));
 }
 .dark\:text-rose-300:is(.dark *) {
   --tw-text-opacity: 1;
